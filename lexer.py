@@ -76,7 +76,7 @@ def openfile(path: str):
     return f
 
 
-# changes the name of typdef to term before code is being lexer
+# changes the name of typedef to term before code is being lexer
 def find_replace_typedef_define(text: list[str]) -> list[str]:
     global typedef_list
     text_pointer = 0
