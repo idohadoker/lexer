@@ -90,3 +90,9 @@ class Include:
 
     def __str__(self):
         return f'name: {self.name}  | visited: {self.visited}'
+
+
+class Node:
+    def __init__(self, data: Include):
+        self.data = data
+        self.next = list[Include]
