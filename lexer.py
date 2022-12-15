@@ -3,20 +3,6 @@ import re
 from utills import *
 
 
-def lex_include(text: list[str]):
-    text_pointer = 0
-    flag = True
-    while text_pointer < len(text) and flag is True:
-        line = text[text_pointer]
-        line = line.split()
-        if line[0] == r'#include':
-            if re.findall(RE_Headers, line[1]):
-                header_files_list.append(Include(line[1].replace("\"", ""), False))
-        else:
-            flag = False
-        text_pointer += 1
-
-
 def lex_define(define_line: list[str], text_pointer: int):
     if re.match(RE_Function, define_line[0]):
         print('macro not supported')
@@ -120,3 +106,27 @@ def get_text(file) -> list[str]:
         for sep in separate:
             text[i] = text[i].replace(sep, f' {sep} ')
     return text
+
+
+def find_library_includes(file: str) -> list[str]:
+    # Read the contents of the file
+    with open(file, 'r') as f:
+        contents = f.read()
+
+    # Use a regular expression to find all include statements that start with "<"
+    # (indicating that they are library includes)
+    library_includes = re.findall(r'#include *"([^"]+)"', contents)
+    return library_includes
+
+
+# This function searches for all includes in the given file, and then recursively
+# searches for includes in those files, until it reaches a file with no includes
+def search_for_includes(file: str) -> list[str]:
+    # Find all library includes in the file
+    includes = find_library_includes(file)
+    # For each include, search for includes in that file
+    for include in includes:
+        header_files_list.append(include)
+        print(include)
+        search_for_includes(include)
+    return header_files_list

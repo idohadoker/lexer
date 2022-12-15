@@ -42,16 +42,15 @@ RE_lBRACKET = r'{'
 RE_rBRACKETS = r'}'
 RE_number = r'\d+'
 RE_Identifiers = r'^[a-zA-Z_]+[a-zA-Z0-9_]*'
-RE_Headers = r'[a-zA-Z]+\.[h]'
 RE_Function = r'[a-zA-Z_][a-zA-Z0-9_]*\('
 # -----------------------------------------------------------------------------------------------------------------
-header_files_list = []
-
 define_list = []
 define_dictionary: dict[str, int] = {}
 
 typedef_dictionary: dict[str, int] = {}
 typedef_list = []
+
+header_files_list = []
 
 
 class Define:
@@ -83,16 +82,5 @@ class Typedef:
         return f' name:  {self.name} | term: {self.term}'
 
 
-class Include:
-    def __init__(self, name: str, visited: bool):
-        self.name = name
-        self.visited = visited
-
-    def __str__(self):
-        return f'name: {self.name}  | visited: {self.visited}'
 
 
-class Node:
-    def __init__(self, data: Include):
-        self.data = data
-        self.next = list[Include]
