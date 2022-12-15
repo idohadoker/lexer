@@ -4,6 +4,8 @@ from utills import *
 
 
 def lex_define(define_line: list[str], text_pointer: int):
+    if len(define_line) < 2:
+        return
     if re.match(RE_Function, define_line[0]):
         print('macro not supported')
     else:
@@ -69,6 +71,9 @@ def find_replace_typedef_define(text: list[str]) -> list[str]:
     while text_pointer < len(text):
         line = text[text_pointer]
         line = line.split()
+        if len(line) == 0:
+            text_pointer += 1
+            continue
         if line[0] == r'typedef':
             if not re.match(r'struct', line[1]):
                 find_typedef(line[1:], text_pointer)
@@ -99,9 +104,8 @@ def close_file(file):
 
 
 def get_text(file) -> list[str]:
-    separate = [';', '++', '--', ',', '*', '{', '}', '(', ')']
+    separate = [';', '++', '--', ',', '*', '{', '}']
     text = file.read().split('\n')
-    text = [line for line in text if line != '']
     for i in range(len(text)):
         for sep in separate:
             text[i] = text[i].replace(sep, f' {sep} ')
@@ -143,6 +147,17 @@ def remove_duplicates(header_files_list: list[str]) -> list[str]:
 
 def lex(header_files_list: list[str]):
     header_pointer = 0
+    print(header_files_list)
     while header_pointer < len(header_files_list):
-        print(header_files_list[header_pointer])
+        file = openfile(header_files_list[header_pointer])
+        text = get_text(file)
+        text = find_replace_typedef_define(text)
+        find_functions(text)
         header_pointer += 1
+
+
+def find_functions(text: list[str]):
+    text_pointer = 0
+    while text_pointer < len(text):
+        print(text[text_pointer])
+        text_pointer += 1
