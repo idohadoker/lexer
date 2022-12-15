@@ -125,8 +125,24 @@ def search_for_includes(file: str) -> list[str]:
     # Find all library includes in the file
     includes = find_library_includes(file)
     # For each include, search for includes in that file
+    i = 0
     for include in includes:
         header_files_list.append(include)
-        print(include)
         search_for_includes(include)
     return header_files_list
+
+
+def remove_duplicates(header_files_list: list[str]) -> list[str]:
+    header_files_list = header_files_list[::-1]
+    new_list = []
+    for header in header_files_list:
+        if header not in new_list:
+            new_list.append(header)
+    return new_list
+
+
+def lex(header_files_list: list[str]):
+    header_pointer = 0
+    while header_pointer < len(header_files_list):
+        print(header_files_list[header_pointer])
+        header_pointer += 1

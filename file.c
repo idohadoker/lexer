@@ -28,8 +28,6 @@
 // END foo 
 
 #include "list.h"
-#include "smt.h"
-
 int main(int argc, char **argv)
 {
     int a = 1;
@@ -44,4 +42,3 @@ int main(int argc, char **argv)
 // see https://bellard.org/tcc/tcc-doc.html
 //
 // run with: "tcc mod_math.c -run mod_test.c"
-

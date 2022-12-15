@@ -2,7 +2,6 @@ RE_RESERVED_WORDS = [r'while',
                      r'do',
                      r'for',
                      r'if',
-                     r'else if',
                      r'else',
                      r'switch',
                      r'case',
@@ -64,12 +63,12 @@ class Define:
 
 
 class Token:
-    def __int__(self, id: str, name: str):
+    def __int__(self, id: str, value: str, line_number: int, parent_file: str): # if its a function list[variables] and return value
         self.id = id
-        self.name = name
+        self.value = value
 
     def __str__(self):
-        return f' id | {self.id} name | {self.name}'
+        return f' id | {self.id} value | {self.value}'
 
 
 class Typedef:
@@ -82,5 +81,10 @@ class Typedef:
         return f' name:  {self.name} | term: {self.term}'
 
 
+class Include:
+    def __init__(self, name: str, father: str):
+        self.name = name
+        self.father = father
 
-
+    def __str__(self):
+        return f' name:  {self.name} | father: {self.father}'
