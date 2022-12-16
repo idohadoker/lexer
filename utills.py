@@ -82,9 +82,9 @@ class Typedef:
 
 
 class Include:
-    def __init__(self, name: str, father: str):
-        self.name = name
-        self.father = father
+    def __init__(self, header: str, code: str):
+        self.header = header
+        self.code = code
 
     def __str__(self):
-        return f' name:  {self.name} | father: {self.father}'
+        return f' name:  {self.header} | father: {self.code}'

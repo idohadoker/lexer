@@ -136,28 +136,28 @@ def search_for_includes(file: str) -> list[str]:
     return header_files_list
 
 
-def remove_duplicates(header_files_list: list[str]) -> list[str]:
+def remove_duplicates(header_files_list: list[str]) -> list[Include]:
     header_files_list = header_files_list[::-1]
     new_list = []
-    for header in header_files_list:
-        if header not in new_list:
-            new_list.append(header)
+    for i in range(len(header_files_list) - 1):
+        if header_files_list[i] not in new_list:
+            new_list.append(Include(header_files_list[i], header_files_list[i].replace('.h', '.c')))
+    new_list.append(Include(header_files_list[len(header_files_list) - 1], 'none'))
     return new_list
 
 
-def lex(header_files_list: list[str]):
+def lex(header_files_list: list[Include]):
     header_pointer = 0
-    print(header_files_list)
-    while header_pointer < len(header_files_list):
-        file = openfile(header_files_list[header_pointer])
-        text = get_text(file)
-        text = find_replace_typedef_define(text)
-        find_functions(text)
+    while header_pointer < len(header_files_list) - 1:
+        #  file = openfile(header_files_list[header_pointer].header)
+        #      text = get_text(file)
+        #     text = find_replace_typedef_define(text)
+        #      find_functions(text)
         header_pointer += 1
+    print(f'at the end need to go inside{header_files_list[len(header_files_list) - 1]}')
 
 
 def find_functions(text: list[str]):
     text_pointer = 0
     while text_pointer < len(text):
-        print(text[text_pointer])
         text_pointer += 1
