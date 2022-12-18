@@ -205,6 +205,7 @@ def extract_function(function_text, text_pointer, file: str):
             if text_pointer == start_pointer:
                 return_value = get_return_value(line)
                 i = len(return_value.split(' '))
+                function_identifiers_list = get_variables(line[i + 2:])
                 name = line[i]
                 break
             match line[i]:
@@ -227,3 +228,26 @@ def get_return_value(line: list[str]) -> str:
         return_value += ' ' + line[i]
         i += 1
     return return_value
+
+
+def get_variables(variables_line: list[str]) -> list[Variable]:
+    variables_list = []
+    i = 0
+    while i < len(variables_line) and variables_line[i] != RE_rPAREN:
+        modifier = ''
+        type = ''
+        while variables_line[i] != r',':
+            if variables_line[i] in RE_MODIFIER:
+                modifier += variables_line[i] + ' '
+            elif variables_line[i] in RE_VARIABLES_TYPE:
+                type += variables_line[i] + ' '
+            else:
+                if re.match(RE_Identifiers, variables_line[i]) and not [variable for variable in variables_list if
+                                                                        variable.identifier == variables_line[i]]:
+                    if modifier == '':
+                        modifier = 'none'
+                    variables_list.append(Variable(variables_line[i], type, modifier))
+                    break
+            i += 1
+        i += 1
+    return variables_list
