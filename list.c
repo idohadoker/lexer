@@ -6,7 +6,7 @@ static void showtasks();
 static void print_task();
 nodeptr list = NULL;
 
-int options(){
+int options(int r){
     int option;
 
     system("clear");

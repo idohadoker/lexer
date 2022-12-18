@@ -95,21 +95,19 @@ class Include:
 
 class Variable:
 
-    def __init__(self, identifier: str, type: str, modifier: str, is_global: str):
+    def __init__(self, identifier: str, type: str, modifier: str):
         self.identifier = identifier
         self.type = type
         self.modifier = modifier
-        self.is_global = is_global
 
     def __str__(self):
-        return f" name : {self.identifier} | type : {self.type} | modifier : {self.modifier} | global : {self.is_global}"
+        return f"name : {self.identifier} | type : {self.type} | modifier : {self.modifier}"
 
 
 class Function:
     def __init__(self, name: str, start_pointer: int, end_pointer: int, return_value: str,
-                 identifier_list: list[Variable], function_text: list[str]):
+                 identifier_list: list[Variable], inside_file: str):
         self.name = name
-        self.function_text = function_text
         self.start_pointer = start_pointer
         self.return_value = return_value
         self.end_pointer = end_pointer
@@ -117,10 +115,11 @@ class Function:
         self.identifiers_list_inc = []
         self.identifiers_list_dec = []
         self.identifier_dict_values = {}
+        self.inside_file = inside_file
         self.returned_value = 0
 
     def __str__(self):
-        string = f'name : {self.name} | identifiers\n'
+        string = f'name : {self.name} | inside file : {self.inside_file} start pointer : {self.start_pointer} end pointer : {self.end_pointer} return value : {self.return_value} | identifiers:\n'
         for identifier in self.identifier_list:
             string += f'{identifier}\n'
         string += f'----------------'

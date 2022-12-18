@@ -7,6 +7,8 @@ def main():
     header_files_list.insert(0, file)
     header_files_list = remove_duplicates(header_files_list)
     lex(header_files_list)
+    for func in function_list:
+        print(func)
 
 
 if __name__ == '__main__':

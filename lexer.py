@@ -153,28 +153,27 @@ def lex(header_files_list: list[Include]):
         print(f'header ->{header_files_list[header_pointer].header}')
         text = get_text(file)
         text = find_replace_typedef_define(text)
-        find_functions(text)
         close_file(file)
         # first we check the header file than we check the c file
         file = openfile(header_files_list[header_pointer].code)
         print(f'code ->{header_files_list[header_pointer].code}')
         text = get_text(file)
         text = find_replace_typedef_define(text)
-        find_functions(text)
+        find_functions(text, header_files_list[header_pointer].code)
         close_file(file)
         header_pointer += 1
 
     print(f'at the end need to go inside{header_files_list[len(header_files_list) - 1]}')
 
 
-def find_functions(text: list[str]):
+def find_functions(text: list[str], file: str):
     text_pointer = 0
     while text_pointer < len(text):
         line = text[text_pointer]
         line = line.split()
         # if line[0] in RE_VARIABLES_TYPE + r'static' + struct_list:
         if isfunction(line):
-            print(line)
+            text_pointer = extract_function(text, text_pointer, file)
         text_pointer += 1
 
 
@@ -186,3 +185,45 @@ def isfunction(function_line: list[str]) -> bool:
                 return True
         i += 1
     return False
+
+
+# gets the start line of function, ending line of function,return value,name and initialized variables
+def extract_function(function_text, text_pointer, file: str):
+    start_pointer = text_pointer
+    function_identifiers_list = []
+    name = ''
+    return_value = ''
+    bracket = 1
+    while text_pointer < len(function_text) and bracket:
+        separate = ['(', ')']
+        for sep in separate:
+            function_text[text_pointer] = function_text[text_pointer].replace(sep, f' {sep} ')
+        line = function_text[text_pointer]
+        line = line.split()
+        i = 0
+        while i < len(line):
+            if text_pointer == start_pointer:
+                return_value = get_return_value(line)
+                i = len(return_value.split(' '))
+                name = line[i]
+                break
+            match line[i]:
+                case r'{':
+                    bracket += 1
+                case r'}':
+                    bracket -= 1
+            i += 1
+        text_pointer += 1
+    function_list.append(Function(name, start_pointer + 1, text_pointer, return_value, function_identifiers_list, file))
+    return text_pointer
+
+
+def get_return_value(line: list[str]) -> str:
+    return_value = ''
+    if line[0] != r'static':
+        return_value += line[0]
+    i = 1
+    while i < len(line) and not line[i + 1] == RE_lPAREN:
+        return_value += ' ' + line[i]
+        i += 1
+    return return_value
