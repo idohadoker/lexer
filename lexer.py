@@ -142,28 +142,25 @@ def remove_duplicates(header_files_list: list[str]) -> list[Include]:
     for i in range(len(header_files_list) - 1):
         if header_files_list[i] not in new_list:
             new_list.append(Include(header_files_list[i], header_files_list[i].replace('.h', '.c')))
-    new_list.append(Include(header_files_list[len(header_files_list) - 1], 'none'))
+    new_list.append(Include('none', header_files_list[len(header_files_list) - 1]))
     return new_list
 
 
 def lex(header_files_list: list[Include]):
     header_pointer = 0
-    while header_pointer < len(header_files_list) - 1:
-        file = openfile(header_files_list[header_pointer].header)
-        print(f'header ->{header_files_list[header_pointer].header}')
-        text = get_text(file)
-        text = find_replace_typedef_define(text)
-        close_file(file)
+    while header_pointer <= len(header_files_list) - 1:
+        if header_files_list[header_pointer].header != 'none':
+            file = openfile(header_files_list[header_pointer].header)
+            text = get_text(file)
+            text = find_replace_typedef_define(text)
+            close_file(file)
         # first we check the header file than we check the c file
         file = openfile(header_files_list[header_pointer].code)
-        print(f'code ->{header_files_list[header_pointer].code}')
         text = get_text(file)
         text = find_replace_typedef_define(text)
         find_functions(text, header_files_list[header_pointer].code)
         close_file(file)
         header_pointer += 1
-
-    print(f'at the end need to go inside{header_files_list[len(header_files_list) - 1]}')
 
 
 def find_functions(text: list[str], file: str):
