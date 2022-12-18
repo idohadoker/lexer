@@ -6,8 +6,7 @@ static void showtasks();
 static void print_task();
 nodeptr list = NULL;
 
-int options()
-{
+int options(){
     int option;
 
     system("clear");
@@ -38,8 +37,7 @@ int options()
     }
     return 1;
 }
-void addtask()
-{
+void addtask(){
     int i = 0;
 
     system("clear");
@@ -92,8 +90,7 @@ void addtask()
 }
 
 // edit task and time
-static void edittask()
-{
+static void edittask(){
     int task, i;
     int c;
     char new_task[100];
@@ -135,8 +132,7 @@ static void edittask()
     sleep(2);
 }
 // delete task list
-void deletetask()
-{
+void deletetask(){
     int i;
     int task;
     system("clear");
@@ -181,8 +177,7 @@ void deletetask()
 }
 
 // show all tasks
-static void showtasks()
-{
+static void showtasks(){
     system("clear");
     printf("\n-------------------------Show Tasks-------------------------\n");
     print_task();
@@ -195,8 +190,7 @@ static void showtasks()
 }
 
 // mark task as done
-static void mark_as_done()
-{
+static void mark_as_done(){
     int task, i;
     nodeptr pos;
     system("clear");
@@ -226,8 +220,7 @@ static void mark_as_done()
     sleep(2);
 }
 
-static void print_task()
-{
+static void print_task(){
     int i;
     if (list == NULL)
     {

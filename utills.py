@@ -51,6 +51,8 @@ typedef_list = []
 
 header_files_list = []
 
+function_list = []
+
 
 class Define:
     def __init__(self, name: str, expression: str, text_pointer: int):
@@ -63,7 +65,8 @@ class Define:
 
 
 class Token:
-    def __int__(self, id: str, value: str, line_number: int, parent_file: str): # if its a function list[variables] and return value
+    def __int__(self, id: str, value: str, line_number: int,
+                parent_file: str):  # if its a function list[variables] and return value
         self.id = id
         self.value = value
 
@@ -88,3 +91,37 @@ class Include:
 
     def __str__(self):
         return f' name:  {self.header} | father: {self.code}'
+
+
+class Variable:
+
+    def __init__(self, identifier: str, type: str, modifier: str, is_global: str):
+        self.identifier = identifier
+        self.type = type
+        self.modifier = modifier
+        self.is_global = is_global
+
+    def __str__(self):
+        return f" name : {self.identifier} | type : {self.type} | modifier : {self.modifier} | global : {self.is_global}"
+
+
+class Function:
+    def __init__(self, name: str, start_pointer: int, end_pointer: int, return_value: str,
+                 identifier_list: list[Variable], function_text: list[str]):
+        self.name = name
+        self.function_text = function_text
+        self.start_pointer = start_pointer
+        self.return_value = return_value
+        self.end_pointer = end_pointer
+        self.identifier_list = identifier_list
+        self.identifiers_list_inc = []
+        self.identifiers_list_dec = []
+        self.identifier_dict_values = {}
+        self.returned_value = 0
+
+    def __str__(self):
+        string = f'name : {self.name} | identifiers\n'
+        for identifier in self.identifier_list:
+            string += f'{identifier}\n'
+        string += f'----------------'
+        return string

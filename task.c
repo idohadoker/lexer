@@ -1,6 +1,5 @@
 #include "task.h"
-Task createtask()
-{
+Task createtask(){
     Task task;
     char new_task[100];
     int c;
@@ -26,8 +25,7 @@ Task createtask()
     return task;
 }
 
-int deletetasknumber()
-{
+int deletetasknumber(){
 
     int task;
     printf("\n Enter task to delete (press 0 to leave)\n");
