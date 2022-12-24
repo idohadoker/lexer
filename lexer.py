@@ -233,20 +233,18 @@ def get_variables(variables_line: list[str]) -> list[Variable]:
     while i < len(variables_line) and variables_line[i] != RE_rPAREN:
         modifier = ''
         type = ''
-        while i < len(variables_line) - 2 and variables_line[i] != r',' and variables_line[i] != RE_rPAREN:
-            type += variables_line[i] + ' '
+        while i < len(variables_line) - 2 and variables_line[i + 1] != r',' and variables_line[i + 1] != RE_rPAREN:
+            if variables_line[i] in RE_MODIFIER:
+                modifier += variables_line[i] + ' '
+            else:
+                type += variables_line[i] + ' '
             i += 1
-
-        for t in type.split(' '):
-            if t in RE_MODIFIER:
-                type += t
-                type.replace(t, '')
 
         if not [variable for variable in variables_list if variable.identifier == variables_line[i]]:
             if modifier == '':
                 modifier = 'none'
             variables_list.append(Variable(variables_line[i], type, modifier))
-        i += 1
+        i += 2
     return variables_list
 
 
