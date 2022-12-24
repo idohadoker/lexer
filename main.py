@@ -8,10 +8,6 @@ def main():
     header_list.insert(0, result)
     header_list = remove_duplicates(header_list)
     tokens_tuple = lex(header_list)
-    for f in function_list:
-        print(f)
-    print(len(function_list))
-
 
 if __name__ == '__main__':
     main()
