@@ -135,30 +135,30 @@ def get_code_file(cfile: str):
     return match.group(1)
 
 
-def remove_duplicates(header_files_list: list[str]) -> list[Include]:
-    header_files_list = header_files_list[::-1]
-    new_list = []
+def remove_duplicates(header_list: list[str]) -> list[Include]:
+    header_list = header_list[::-1]
+    new_list = list()
     for i in range(len(header_files_list) - 1):
-        if header_files_list[i] not in new_list:
-            code_result = search_file(os.getcwd(), get_code_file(header_files_list[i].replace('.h', '.c')))
-            new_list.append(Include(header_files_list[i], code_result))
-    new_list.append(Include('none', header_files_list[len(header_files_list) - 1]))
+        if header_list[i] not in new_list:
+            code_result = search_file(os.getcwd(), get_code_file(header_list[i].replace('.h', '.c')))
+            new_list.append(Include(header_list[i], code_result))
+    new_list.append(Include('none', header_list[len(header_list) - 1]))
     return new_list
 
 
-def lex(header_files_list: list[Include]):
+def lex(header_list: list[Include]):
     header_pointer = 0
-    while header_pointer <= len(header_files_list) - 1:
-        if header_files_list[header_pointer].header != 'none':
-            file = openfile(header_files_list[header_pointer].header)
+    while header_pointer <= len(header_list) - 1:
+        if header_list[header_pointer].header != 'none':
+            file = openfile(header_list[header_pointer].header)
             text = get_text(file)
             text = find_replace_typedef_define(text)
             close_file(file)
         # first we check the header file than we check the c file
-        file = openfile(header_files_list[header_pointer].code)
+        file = openfile(header_list[header_pointer].code)
         text = get_text(file)
         text = find_replace_typedef_define(text)
-        find_functions(text, header_files_list[header_pointer].code)
+        find_functions(text, header_list[header_pointer].code)
         close_file(file)
         header_pointer += 1
 
@@ -187,7 +187,7 @@ def isfunction(function_line: list[str], text: list[str], text_pointer: int) -> 
 # gets the start line of function, ending line of function,return value,name and initialized variables
 def extract_function(function_text: list[str], text_pointer: int, file: str) -> int:
     start_pointer = text_pointer
-    function_identifiers_list = []
+    function_identifiers_list = list()
     name = ''
     return_value = ''
     bracket = 1
@@ -204,6 +204,8 @@ def extract_function(function_text: list[str], text_pointer: int, file: str) -> 
                 i = len(return_value.split(' '))
                 function_identifiers_list = get_variables(line[i + 2:])
                 name = line[i]
+                while not function_text[text_pointer].__contains__('{'):
+                    text_pointer += 1
                 break
             match line[i]:
                 case r'{':
@@ -228,7 +230,7 @@ def get_return_value(line: list[str]) -> str:
 
 
 def get_variables(variables_line: list[str]) -> list[Variable]:
-    variables_list = []
+    variables_list = list()
     i = 0
     while i < len(variables_line) and variables_line[i] != RE_rPAREN:
         modifier = ''

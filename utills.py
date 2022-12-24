@@ -1,4 +1,6 @@
-import os, re
+import os
+import re
+import pycparser
 
 RE_RESERVED_WORDS = [r'while',
                      r'do',
@@ -45,15 +47,15 @@ RE_number = r'\d+'
 RE_Identifiers = r'^[a-zA-Z_]+[a-zA-Z0-9_]*'
 RE_Function = r'[a-zA-Z_][a-zA-Z0-9_]*\('
 # -----------------------------------------------------------------------------------------------------------------
-define_list = []
-define_dictionary: dict[str, int] = {}
+define_list = list()
+define_dictionary: dict[str, int] = dict()
 
-typedef_dictionary: dict[str, int] = {}
-typedef_list = []
+typedef_dictionary: dict[str, int] = dict()
+typedef_list = list()
 
-header_files_list = []
+header_files_list = list()
 
-function_list = []
+function_list = list()
 
 
 class Define:
@@ -67,13 +69,13 @@ class Define:
 
 
 class Token:
-    def __int__(self, id: str, value: str, line_number: int,
-                parent_file: str):  # if its a function list[variables] and return value
-        self.id = id
+    def __int__(self, t_id: str, value: str, line_number: int, parent_file: str):
+        self.id = t_id
         self.value = value
+        self.line_number = line_number
 
     def __str__(self):
-        return f' id | {self.id} value | {self.value}'
+        return f' id | {self.id} value | {self.value} line number | {self.line_number}'
 
 
 class Typedef:
@@ -92,7 +94,7 @@ class Include:
         self.code = code
 
     def __str__(self):
-            return f' name:  {self.header} | father: {self.code}'
+        return f' name:  {self.header} | father: {self.code}'
 
 
 class Variable:
@@ -121,7 +123,8 @@ class Function:
         self.returned_value = 0
 
     def __str__(self):
-        string = f'name : {self.name} | inside file : {self.inside_file} start pointer : {self.start_pointer} end pointer : {self.end_pointer} return value : {self.return_value} | identifiers:\n'
+        string = f'name : {self.name} | inside file : {self.inside_file} start pointer : {self.start_pointer} end ' \
+                 f'pointer : {self.end_pointer} return value : {self.return_value} | identifiers:\n '
         for identifier in self.identifier_list:
             string += f'{identifier}\n'
         string += f'----------------'

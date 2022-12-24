@@ -4,12 +4,13 @@ from lexer import *
 def main():
     filename = input('enter file\n')
     result = search_file(os.getcwd(), filename)
-    header_files_list = search_for_includes(result)
-    header_files_list.insert(0, result)
-    header_files_list = remove_duplicates(header_files_list)
-    lex(header_files_list)
-    for func in function_list:
-        print(func)
+    header_list = search_for_includes(result)
+    header_list.insert(0, result)
+    header_list = remove_duplicates(header_list)
+    tokens_tuple = lex(header_list)
+    for f in function_list:
+        print(f)
+    print(len(function_list))
 
 
 if __name__ == '__main__':
