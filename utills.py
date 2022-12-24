@@ -27,7 +27,7 @@ RE_RESERVED_WORDS = [r'while',
 RE_COMMENT = r'//'  # done
 RE_COMMENT_END = [r'*', r'/']  # done
 RE_COMMENT_START = [r'/', r'*']  # done
-RE_VARIABLES_TYPE = [r'int', r'long', r'short', r'double', r'char', r'float', r'auto', r'void']  # done
+RE_VARIABLES_TYPE = [r'int', r'long', r'short', r'double', r'char', r'float', r'auto', r'void', r'FILE']  # done
 RE_MODIFIER = [r'const', r'signed', r'unsigned', r'static', r'volatile', r'register', r'extern']  # done
 RE_ARITHMETIC_OPERATOR = [r'-', r'+', r'*', r'/', r'%']  # done
 RE_ASSIGNMENTS_OPERATOR = [r'=', r'+=', r'-=', r'*=', r'/=', r'%=']  # done
