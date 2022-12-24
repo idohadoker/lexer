@@ -1,5 +1,3 @@
-# variables
-import re
 from utills import *
 
 
@@ -40,16 +38,14 @@ def value_assignment(math: list[str]) -> str:
             if math[i] in define_dictionary:
                 define = define_list[define_dictionary[math[i]]]
                 math_expression += str(define.expression) + ' '
-                i += 1
             else:
-                print(f' {math[i]} not found in dictionary  ')
-                exit(1)
+                math_expression += str(math[i]) + ' '
         else:
             if math[i] == '^':
                 math_expression += '**' + ' '
             else:
                 math_expression += math[i] + ' '
-            i += 1
+        i += 1
     return math_expression
 
 
@@ -113,12 +109,9 @@ def get_text(file) -> list[str]:
 
 
 def find_library_includes(file: str) -> list[str]:
-    # Read the contents of the file
     with open(file, 'r') as f:
         contents = f.read()
 
-    # Use a regular expression to find all include statements that start with "<"
-    # (indicating that they are library includes)
     library_includes = re.findall(r'#include *"([^"]+)"', contents)
     return library_includes
 
@@ -129,11 +122,17 @@ def search_for_includes(file: str) -> list[str]:
     # Find all library includes in the file
     includes = find_library_includes(file)
     # For each include, search for includes in that file
-    i = 0
     for include in includes:
-        header_files_list.append(include)
-        search_for_includes(include)
+        result = search_file(os.getcwd(), include)
+        header_files_list.append(result)
+        search_for_includes(result)
     return header_files_list
+
+
+def get_code_file(cfile: str):
+    pattern = re.compile(r'([^/]+)$')
+    match = pattern.search(cfile)
+    return match.group(1)
 
 
 def remove_duplicates(header_files_list: list[str]) -> list[Include]:
@@ -141,7 +140,8 @@ def remove_duplicates(header_files_list: list[str]) -> list[Include]:
     new_list = []
     for i in range(len(header_files_list) - 1):
         if header_files_list[i] not in new_list:
-            new_list.append(Include(header_files_list[i], header_files_list[i].replace('.h', '.c')))
+            code_result = search_file(os.getcwd(), get_code_file(header_files_list[i].replace('.h', '.c')))
+            new_list.append(Include(header_files_list[i], code_result))
     new_list.append(Include('none', header_files_list[len(header_files_list) - 1]))
     return new_list
 
@@ -169,23 +169,23 @@ def find_functions(text: list[str], file: str):
         line = text[text_pointer]
         line = line.split()
         # if line[0] in RE_VARIABLES_TYPE + r'static' + struct_list:
-        if isfunction(line):
+        if isfunction(line, text, text_pointer):
             text_pointer = extract_function(text, text_pointer, file)
         text_pointer += 1
 
 
-def isfunction(function_line: list[str]) -> bool:
+def isfunction(function_line: list[str], text: list[str], text_pointer: int) -> bool:
     i = 0
     while i < len(function_line):
         if re.match(RE_Function, function_line[i]):
-            if function_line[len(function_line) - 1] == RE_lBRACKET:
+            if function_line[len(function_line) - 1] == RE_lBRACKET or text[text_pointer + 1].__contains__(RE_lBRACKET):
                 return True
         i += 1
     return False
 
 
 # gets the start line of function, ending line of function,return value,name and initialized variables
-def extract_function(function_text, text_pointer, file: str):
+def extract_function(function_text: list[str], text_pointer: int, file: str) -> int:
     start_pointer = text_pointer
     function_identifiers_list = []
     name = ''
@@ -248,3 +248,14 @@ def get_variables(variables_line: list[str]) -> list[Variable]:
             i += 1
         i += 1
     return variables_list
+
+
+def search_file(folder: str, filename: str) -> str:
+    for item in os.listdir(folder):
+        item_path = os.path.join(folder, item)
+        if os.path.isfile(item_path) and item == filename:
+            return item_path
+        elif os.path.isdir(item_path):
+            result = search_file(item_path, filename)
+            if result is not None:
+                return result
