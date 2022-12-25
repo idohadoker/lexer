@@ -1,7 +1,5 @@
 import os
 import re
-import pycparser
-
 RE_RESERVED_WORDS = [r'while',
                      r'do',
                      r'for',
@@ -13,31 +11,31 @@ RE_RESERVED_WORDS = [r'while',
                      r'continue',
                      r'union',
                      r'default',
-                     r'typedef',  # done
-                     r'struct',  # need
-                     r'typedef struct',  # need
-                     r'enum',  # done
+                     r'typedef',
+                     r'struct',
+                     r'typedef struct',
+                     r'enum',
                      r'sizeof',
-                     r'#include',  # done
-                     r'#define',  # done
+                     r'#include',
+                     r'#define',
                      r'#if',
                      r'#endif',
                      r'goto,'
                      r'#elif',
                      r'#else',
-                     r'return']  # need
-RE_COMMENT = r'//'  # done
-RE_COMMENT_END = [r'*', r'/']  # done
-RE_COMMENT_START = [r'/', r'*']  # done
-RE_VARIABLES_TYPE = [r'int', r'long', r'short', r'double', r'char', r'float', r'auto', r'void', r'FILE']  # done
-RE_MODIFIER = [r'const', r'signed', r'unsigned', r'static', r'volatile', r'register', r'extern']  # done
-RE_ARITHMETIC_OPERATOR = [r'-', r'+', r'*', r'/', r'%']  # done
-RE_ASSIGNMENTS_OPERATOR = [r'=', r'+=', r'-=', r'*=', r'/=', r'%=']  # done
-RE_BITWISE_ASSIGNMENT_OPERATOR = [r'<<=', r'>>=', r'&=', r'|=', r'^=']  # done
-RE_UNARY_OPERATOR = [r'++', r'--']  # done
+                     r'return']
+RE_COMMENT = r'//'
+RE_COMMENT_END = [r'*', r'/']
+RE_COMMENT_START = [r'/', r'*']
+RE_VARIABLES_TYPE = [r'int', r'long', r'short', r'double', r'char', r'float', r'auto', r'void', r'FILE']
+RE_MODIFIER = [r'const', r'signed', r'unsigned', r'static', r'volatile', r'register', r'extern']
+RE_ARITHMETIC_OPERATOR = [r'-', r'+', r'*', r'/', r'%']
+RE_ASSIGNMENTS_OPERATOR = [r'=', r'+=', r'-=', r'*=', r'/=', r'%=']
+RE_BITWISE_ASSIGNMENT_OPERATOR = [r'<<=', r'>>=', r'&=', r'|=', r'^=']
+RE_UNARY_OPERATOR = [r'++', r'--']
 RE_RELATIONAL_OPERATOR = [r'<=', r'<', r'>=', r'>', r'==', r'!=']
 RE_LOGICAL_OPERATOR = [r'&&', r'||']
-RE_BITWISE_OPERATOR = [r'&', r',', r',', r'^', r'<<', r'>>', r'~']  # done
+RE_BITWISE_OPERATOR = [r'&', r',', r',', r'^', r'<<', r'>>', r'~']
 RE_Special_Characters = [r'[', r']', r'{', r'}', r'.', r'\"']
 RE_lPAREN = r'('
 RE_rPAREN = r')'

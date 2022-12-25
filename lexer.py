@@ -1,6 +1,7 @@
 from utills import *
 
 
+# get define
 def lex_define(define_line: list[str], text_pointer: int):
     if len(define_line) < 2:
         return
@@ -13,6 +14,7 @@ def lex_define(define_line: list[str], text_pointer: int):
         define_dictionary[name] = len(define_list) - 1
 
 
+# finds all the typedefs
 def find_typedef(typedef: list[str], text_pointer: int):
     i = 0
     term = ''
@@ -24,6 +26,7 @@ def find_typedef(typedef: list[str], text_pointer: int):
     typedef_dictionary[name] = len(typedef_list) - 1
 
 
+# gets the assignment
 def value_assignment(math: list[str]) -> str:
     math_expression = ''
     for x in math:
@@ -49,6 +52,7 @@ def value_assignment(math: list[str]) -> str:
     return math_expression
 
 
+# returns the open file
 def openfile(path: str):
     f = None
     try:
@@ -95,12 +99,14 @@ def find_replace_typedef_define(text: list[str]) -> list[str]:
     return text
 
 
+# closes the file
 def close_file(file):
     file.close()
 
 
+# separate the file
 def get_text(file) -> list[str]:
-    separate = [';', '++', '--', ',', '*', '{', '}']
+    separate = [';', '++', '--', ',', '*', '{', '}', ')', '//', '/*', '\*']
     text = file.read().split('\n')
     for i in range(len(text)):
         for sep in separate:
@@ -108,6 +114,7 @@ def get_text(file) -> list[str]:
     return text
 
 
+# find all included files
 def find_library_includes(file: str) -> list[str]:
     with open(file, 'r') as f:
         contents = f.read()
@@ -148,11 +155,13 @@ def remove_duplicates(header_list: list[str]) -> list[Include]:
 
 def lex(header_list: list[Include]):
     header_pointer = 0
+    tpl = tuple()
     while header_pointer <= len(header_list) - 1:
         if header_list[header_pointer].header != 'none':
             file = openfile(header_list[header_pointer].header)
             text = get_text(file)
             text = find_replace_typedef_define(text)
+            tpl = tokenize(text, header_list[header_pointer].header, tpl)
             close_file(file)
         # first we check the header file than we check the c file
         file = openfile(header_list[header_pointer].code)
@@ -161,19 +170,47 @@ def lex(header_list: list[Include]):
         find_functions(text, header_list[header_pointer].code)
         close_file(file)
         header_pointer += 1
+    return tpl
 
+
+# TODO finish
+def tokenize(file_text: list[str], file_name: str, tpl: tuple) -> tuple:
+    text_pointer = 0
+    new_tpl = ()
+
+    if file_name.endswith('.h'):
+        while text_pointer < len(file_text):
+            line = file_text[text_pointer].split()
+            for i in range(len(line)):
+                if re.match(RE_Function, line[i]):
+                    file_text[text_pointer] = file_text[text_pointer].replace('(', ' ')
+            text_pointer += 1
+    return tpl
+
+
+# finds all the functions
 
 def find_functions(text: list[str], file: str):
     text_pointer = 0
     while text_pointer < len(text):
         line = text[text_pointer]
         line = line.split()
-        # if line[0] in RE_VARIABLES_TYPE + r'static' + struct_list:
-        if isfunction(line, text, text_pointer):
-            text_pointer = extract_function(text, text_pointer, file)
+        if len(line) > 0:
+            if line[0] != '//':
+                if isfunction(line, text, text_pointer):
+                    text_pointer = extract_function(text, text_pointer, file)
+            if line[0] == '/*':
+                flag = True
+                while flag is True:
+                    i = 0
+                    while i < len(line) and flag is True:
+                        if line[i] == '*/':
+                            flag = False
+                        i += 1
         text_pointer += 1
 
 
+# gets a line and uses regular exression to check if its a function
 def isfunction(function_line: list[str], text: list[str], text_pointer: int) -> bool:
     i = 0
     while i < len(function_line):
@@ -218,6 +255,7 @@ def extract_function(function_text: list[str], text_pointer: int, file: str) -> 
     return text_pointer
 
 
+# gets the return value of function
 def get_return_value(line: list[str]) -> str:
     return_value = ''
     if line[0] != r'static':
@@ -229,6 +267,7 @@ def get_return_value(line: list[str]) -> str:
     return return_value
 
 
+# gets all the variables of the function
 def get_variables(variables_line: list[str]) -> list[Variable]:
     variables_list = list()
     i = 0
@@ -250,6 +289,7 @@ def get_variables(variables_line: list[str]) -> list[Variable]:
     return variables_list
 
 
+# search inside the cwd(current working directory) for the wanted file file
 def search_file(folder: str, filename: str) -> str:
     for item in os.listdir(folder):
         item_path = os.path.join(folder, item)
