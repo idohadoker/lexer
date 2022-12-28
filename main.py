@@ -6,9 +6,12 @@ def main():
     result = search_file(os.getcwd(), filename)
     header_list = search_for_includes(result)
     header_list.insert(0, result)
-    header_list = remove_duplicates(header_list)
+    header_list = convert_to_include(header_list)
     tokens_tuple = lex(header_list)
-    print(len(function_list))
+    for token in tokens_tuple:
+        print(token)
+    print(len(tokens_tuple))
+
 
 if __name__ == '__main__':
     main()

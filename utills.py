@@ -1,5 +1,6 @@
 import os
 import re
+
 RE_RESERVED_WORDS = [r'while',
                      r'do',
                      r'for',
@@ -12,6 +13,8 @@ RE_RESERVED_WORDS = [r'while',
                      r'union',
                      r'default',
                      r'typedef',
+                     r'#ifndef',
+                     r'#endif',
                      r'struct',
                      r'typedef struct',
                      r'enum',
@@ -23,37 +26,31 @@ RE_RESERVED_WORDS = [r'while',
                      r'goto,'
                      r'#elif',
                      r'#else',
-                     r'return']
-RE_COMMENT = r'//'
-RE_COMMENT_END = [r'*', r'/']
-RE_COMMENT_START = [r'/', r'*']
-RE_VARIABLES_TYPE = [r'int', r'long', r'short', r'double', r'char', r'float', r'auto', r'void', r'FILE']
-RE_MODIFIER = [r'const', r'signed', r'unsigned', r'static', r'volatile', r'register', r'extern']
-RE_ARITHMETIC_OPERATOR = [r'-', r'+', r'*', r'/', r'%']
-RE_ASSIGNMENTS_OPERATOR = [r'=', r'+=', r'-=', r'*=', r'/=', r'%=']
-RE_BITWISE_ASSIGNMENT_OPERATOR = [r'<<=', r'>>=', r'&=', r'|=', r'^=']
-RE_UNARY_OPERATOR = [r'++', r'--']
-RE_RELATIONAL_OPERATOR = [r'<=', r'<', r'>=', r'>', r'==', r'!=']
-RE_LOGICAL_OPERATOR = [r'&&', r'||']
-RE_BITWISE_OPERATOR = [r'&', r',', r',', r'^', r'<<', r'>>', r'~']
-RE_Special_Characters = [r'[', r']', r'{', r'}', r'.', r'\"']
-RE_lPAREN = r'('
-RE_rPAREN = r')'
-RE_lBRACKET = r'{'
-RE_rBRACKETS = r'}'
-RE_number = r'\d+'
-RE_Identifiers = r'^[a-zA-Z_]+[a-zA-Z0-9_]*'
+                     r'return']  # done
+RE_COMMENT = r'//'  # done
+RE_COMMENT_END = [r'*', r'/']  # done
+RE_COMMENT_START = [r'/', r'*']  # done
+RE_VARIABLES_TYPE = [r'int', r'long', r'short', r'double', r'char', r'float', r'auto', r'void', r'FILE']  # done
+RE_MODIFIER = [r'const', r'signed', r'unsigned', r'static', r'volatile', r'register', r'extern']  # done
+RE_ARITHMETIC_OPERATOR = [r'-', r'+', r'*', r'/', r'%']  # done
+RE_ASSIGNMENTS_OPERATOR = [r'=', r'+=', r'-=', r'*=', r'/=', r'%=']  # done
+RE_BITWISE_ASSIGNMENT_OPERATOR = [r'<<=', r'>>=', r'&=', r'|=', r'^=']  # done
+RE_UNARY_OPERATOR = [r'++', r'--']  # done
+RE_RELATIONAL_OPERATOR = [r'<=', r'<', r'>=', r'>', r'==', r'!=']  # done
+RE_LOGICAL_OPERATOR = [r'&&', r'||']  # done
+RE_BITWISE_OPERATOR = [r'&', r',', r',', r'^', r'<<', r'>>', r'~']  # done
+RE_Special_Characters = [r'[', r']', r'.', r'\"', '&']  # done
+RE_lPAREN = r'('  # done
+RE_rPAREN = r')'  # done
+RE_lBRACKET = r'{'  # done
+RE_rBRACKETS = r'}'  # done
+RE_number = r'\d+'  # done
+RE_Headers = r'#include *"([^"]+[a-zA-Z]+\.[h])"'
+RE_Identifiers = r'^[a-zA-Z_]+[a-zA-Z0-9_]*'  # done
 RE_Function = r'[a-zA-Z_][a-zA-Z0-9_]*\('
+
+
 # -----------------------------------------------------------------------------------------------------------------
-define_list = list()
-define_dictionary: dict[str, int] = dict()
-
-typedef_dictionary: dict[str, int] = dict()
-typedef_list = list()
-
-header_files_list = list()
-
-function_list = list()
 
 
 class Define:
@@ -67,13 +64,14 @@ class Define:
 
 
 class Token:
-    def __int__(self, t_id: str, value: str, line_number: int, parent_file: str):
+    def __init__(self, t_id: str, value: str, line_number: int, parent_file: str):
         self.id = t_id
         self.value = value
         self.line_number = line_number
+        self.file = parent_file
 
     def __str__(self):
-        return f' id | {self.id} value | {self.value} line number | {self.line_number}'
+        return f' id : {self.id} | value : {self.value} | line number : {self.line_number} | parent file : {self.file} '
 
 
 class Typedef:
@@ -106,7 +104,7 @@ class Variable:
         return f"name : {self.identifier} | type : {self.type} | modifier : {self.modifier}"
 
 
-class Function:
+class Function_Token:
     def __init__(self, name: str, start_pointer: int, end_pointer: int, return_value: str,
                  identifier_list: list[Variable], inside_file: str):
         self.name = name
@@ -114,11 +112,7 @@ class Function:
         self.return_value = return_value
         self.end_pointer = end_pointer
         self.identifier_list = identifier_list
-        self.identifiers_list_inc = []
-        self.identifiers_list_dec = []
-        self.identifier_dict_values = {}
         self.inside_file = inside_file
-        self.returned_value = 0
 
     def __str__(self):
         string = f'name : {self.name} | inside file : {self.inside_file} start pointer : {self.start_pointer} end ' \
@@ -127,3 +121,15 @@ class Function:
             string += f'{identifier}\n'
         string += f'----------------'
         return string
+
+
+function_list: list[Function_Token] = list()
+function_dict: dict[str, int] = dict()
+
+define_list: list[Define] = list()
+define_dictionary: dict[str, int] = dict()
+
+typedef_dictionary: dict[str, int] = dict()
+typedef_list: list[Typedef] = list()
+
+header_files_list = list()
