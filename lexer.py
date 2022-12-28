@@ -106,7 +106,7 @@ def close_file(file):
 
 # separate the file
 def get_text(file) -> list[str]:
-    separate = [';', '++', '--', ',', '*', '{', '}', ')', '//', '/*', '\*']
+    separate = [';', '++', '--', ',', '*', '{', '}', ')', '//', '/*', '\*', '->']
     text = file.read().split('\n')
     for i in range(len(text)):
         for sep in separate:
@@ -206,7 +206,7 @@ def tokenize(file_text: list[str], file_name: str, tpl: tuple) -> tuple:
                 flag = False
             elif i + 1 < len(line) and line[i] == '/' and line[i + 1] == '*':
                 text_pointer = end_comment(file_text, text_pointer)
-            if line[i] in function_dict and line[len(line) - 1] != ';':
+            elif line[i] in function_dict and line[len(line) - 1] != ';':
                 current_line_token_list.clear()
                 current_line_token_list.append(function_list[function_dict[line[i]]])
                 flag = False
@@ -214,7 +214,7 @@ def tokenize(file_text: list[str], file_name: str, tpl: tuple) -> tuple:
                 if line[0] == r'#define':
                     flag = False
                 else:
-                    current_line_token_list.append(word_token(line, i, file_name, text_pointer))
+                    current_line_token_list.append(word_token(line, i, file_name, text_pointer + 1))
             i += 1
         if len(current_line_token_list) > 0:
             current_line_token_list = list(filter(lambda tk: tk is not None, current_line_token_list))
@@ -223,17 +223,21 @@ def tokenize(file_text: list[str], file_name: str, tpl: tuple) -> tuple:
     return tpl + tuple(new_tpl)
 
 
-def get_token_type_for_asterisk(code: list[str], i: int) -> bool:
-    if i == 0 or len(code[i - 1]):
-        return True
-    return False
+def get_token_type_for_asterisk(text: list[str], pos: int) -> bool:
+    if pos > 0:
+        if text[pos - 1].isalpha() or text[pos - 1].isdigit():
+            return False
+    if pos < len(text) - 1:
+        if text[pos + 1].isalpha() or text[pos + 1].isdigit():
+            return False
+    return True
 
 
 # finds the correct token for specific word
 
 def word_token(line: list[str], position: int, file_name: str, text_pointer: int) -> Token:
     word = line[position]
-    tk = Token('', word, text_pointer, file_name)
+    tk = Token('', word, text_pointer + 1, file_name)
     if word in RE_MODIFIER:
         tk.id = 'Modifier'
         return tk
@@ -290,6 +294,14 @@ def word_token(line: list[str], position: int, file_name: str, text_pointer: int
     if word in RE_RESERVED_WORDS:
         tk.id = 'reserved words'
         return tk
+    if word == RE_rSQUREB_RACKET:
+        tk.id = 'right square bracket'
+        return tk
+    if word == RE_lSQUREB_RACKET:
+        tk.id = 'left square bracket'
+        return tk
+    tk.id = 'unknown'
+    return tk
 
 
 # finds all the functions

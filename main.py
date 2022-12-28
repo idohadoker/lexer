@@ -8,9 +8,8 @@ def main():
     header_list.insert(0, result)
     header_list = convert_to_include(header_list)
     tokens_tuple = lex(header_list)
-    for token in tokens_tuple:
-        print(token)
-    print(len(tokens_tuple))
+    for tk in tokens_tuple:
+        print(tk)
 
 
 if __name__ == '__main__':
