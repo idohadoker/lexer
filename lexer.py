@@ -294,10 +294,10 @@ def word_token(line: list[str], position: int, file_name: str, text_pointer: int
     if word in RE_RESERVED_WORDS:
         tk.id = 'reserved words'
         return tk
-    if word == RE_rSQUREB_RACKET:
+    if word == RE_rSQUARE_BRACKET:
         tk.id = 'right square bracket'
         return tk
-    if word == RE_lSQUREB_RACKET:
+    if word == RE_lSQUARE_BRACKET:
         tk.id = 'left square bracket'
         return tk
     tk.id = 'unknown'
