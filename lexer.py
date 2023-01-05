@@ -9,9 +9,10 @@ def lex_define(define_line: list[str], text_pointer: int):
         print('macro not supported')
     else:
         name = define_line[0]
-        expression = value_assignment(define_line[1:])
-        define_list.append(Define(name, expression, text_pointer))
-        define_dictionary[name] = len(define_list) - 1
+        if name not in define_dictionary:
+            expression = value_assignment(define_line[1:])
+            define_list.append(Define(name, expression, text_pointer))
+            define_dictionary[name] = len(define_list) - 1
 
 
 # finds all the typedefs
@@ -106,11 +107,14 @@ def close_file(file):
 
 # separate the file
 def get_text(file) -> list[str]:
-    separate = [';', '++', '--', ',', '*', '{', '}', ')', '//', '/*', '\*', '->']
+    separate = [';', '++', '--', ',' '{', '}', ')', '&&', '!', '^', '|',
+                '<<', '>>', '~', '"', '\'', '*', '+', '-', '/', '[', ']', ':', ',']
     text = file.read().split('\n')
     for i in range(len(text)):
         for sep in separate:
             text[i] = text[i].replace(sep, f' {sep} ')
+            if sep == '-':
+                text[i] = text[i].replace('- >', ' -> ')
     return text
 
 
@@ -174,6 +178,64 @@ def lex(header_list: list[Include]):
     return tpl
 
 
+def printfile(file_text: list[str], file_name: str):
+    text_pointer = 0
+    print(file_name)
+    while text_pointer < len(file_text):
+        line = file_text[text_pointer].split()
+        print(line)
+        text_pointer += 1
+
+
+def tokenize(file_text: list[str], file_name: str, tpl: tuple) -> tuple:
+    text_pointer = 0
+    new_tpl = list()
+    printfile(file_text, file_name)
+    while text_pointer < len(file_text):
+        separate = ['(', ')']
+        for sep in separate:
+            file_text[text_pointer] = file_text[text_pointer].replace(sep, f' {sep} ')
+        line = file_text[text_pointer].split()
+        current_line_token_list = list()
+        i = 0
+        flag = True
+        while i < (len(line)) and flag is True:
+            if i + 1 < len(line) and line[i] == '/' and line[i + 1] == '/':
+                flag = False
+            elif i + 1 < len(line) and line[i] == '/' and line[i + 1] == '*':
+                text_pointer = end_comment(file_text, text_pointer)
+            elif line[i] in function_dict and line[len(line) - 1] != ';':
+                current_line_token_list.clear()
+                current_line_token_list.append(function_list[function_dict[line[i]]])
+                flag = False
+            else:
+                # get rid of preprocessor stuff
+                if re.match(r'#', line[0]):
+                    flag = False
+                else:
+                    tokens = word_token(line, i, file_name, text_pointer + 1)
+                    current_line_token_list.extend(tokens)
+            i += 1
+        if len(current_line_token_list) > 0:
+            current_line_token_list = list(filter(lambda tk: tk is not None, current_line_token_list))
+            new_tpl.extend(current_line_token_list)
+        text_pointer += 1
+    return tpl + tuple(new_tpl)
+
+
+def word_token(line: list[str], position: int, file_name: str, text_pointer: int) -> list[Token]:
+    word = line[position]
+    tk = Token('', word, text_pointer, file_name)
+    tok = list()
+    if word in RE_RESERVED_WORDS:
+        tk.id = 'reserve word'
+        tok.append(tk)
+        return tok
+    tk.id = 'unknown'
+    tok.append(tk)
+    return tok
+
+
 def end_comment(file_text: list[str], text_pointer: int) -> int:
     flag = False
 
@@ -188,123 +250,6 @@ def end_comment(file_text: list[str], text_pointer: int) -> int:
     return text_pointer - 1
 
 
-# tokenize the entire text file
-
-def tokenize(file_text: list[str], file_name: str, tpl: tuple) -> tuple:
-    text_pointer = 0
-    new_tpl = list()
-    while text_pointer < len(file_text):
-        separate = ['(', ')']
-        for sep in separate:
-            file_text[text_pointer] = file_text[text_pointer].replace(sep, f' {sep} ')
-        line = file_text[text_pointer].split()
-        current_line_token_list = list()
-        i = 0
-        flag = True
-        while i < (len(line)) and flag is True:
-            if line[i] == '//':
-                flag = False
-            elif i + 1 < len(line) and line[i] == '/' and line[i + 1] == '*':
-                text_pointer = end_comment(file_text, text_pointer)
-            elif line[i] in function_dict and line[len(line) - 1] != ';':
-                current_line_token_list.clear()
-                current_line_token_list.append(function_list[function_dict[line[i]]])
-                flag = False
-            else:
-                if line[0] == r'#define':
-                    flag = False
-                else:
-                    current_line_token_list.append(word_token(line, i, file_name, text_pointer + 1))
-            i += 1
-        if len(current_line_token_list) > 0:
-            current_line_token_list = list(filter(lambda tk: tk is not None, current_line_token_list))
-            new_tpl.extend(current_line_token_list)
-        text_pointer += 1
-    return tpl + tuple(new_tpl)
-
-
-def get_token_type_for_asterisk(text: list[str], pos: int) -> bool:
-    if pos > 0:
-        if text[pos - 1].isalpha() or text[pos - 1].isdigit():
-            return False
-    if pos < len(text) - 1:
-        if text[pos + 1].isalpha() or text[pos + 1].isdigit():
-            return False
-    return True
-
-
-# finds the correct token for specific word
-
-def word_token(line: list[str], position: int, file_name: str, text_pointer: int) -> Token:
-    word = line[position]
-    tk = Token('', word, text_pointer + 1, file_name)
-    if word in RE_MODIFIER:
-        tk.id = 'Modifier'
-        return tk
-    if word in RE_RELATIONAL_OPERATOR:
-        tk.id = 'Relational_operator'
-        return tk
-    if word in RE_VARIABLES_TYPE:
-        tk.id = 'Type'
-        return tk
-    if word in RE_ARITHMETIC_OPERATOR:
-        if word == '*':
-            flag = get_token_type_for_asterisk(line, position)
-            if flag is True:
-                tk.id = 'Token_pointer'
-            else:
-                tk.id = 'Arithmetic operator'
-        return tk
-    if word in RE_ASSIGNMENTS_OPERATOR:
-        tk.id = 'Assignment'
-        return tk
-    if word in RE_BITWISE_ASSIGNMENT_OPERATOR:
-        tk.id = 'Bitwise assignment'
-        return tk
-    if word in RE_UNARY_OPERATOR:
-        tk.id = 'Unary operator'
-        return tk
-    if word in RE_LOGICAL_OPERATOR:
-        tk.id = 'Logical operator'
-        return tk
-    if word in RE_BITWISE_OPERATOR:
-        tk.id = 'Bitwise operator'
-        return tk
-    if word in RE_Special_Characters:
-        tk.id = 'Special character'
-        return tk
-    if word == RE_lPAREN:
-        tk.id = 'lParen'
-        return tk
-    if word == RE_rPAREN:
-        tk.id = 'rParen'
-        return tk
-    if word == RE_lBRACKET:
-        tk.id = 'lBracket'
-        return tk
-    if word == RE_rBRACKETS:
-        tk.id = 'rBracket'
-        return tk
-    if re.match(RE_number, word):
-        tk.id = 'Integer literal'
-        return tk
-    if re.match(RE_Identifiers, word):
-        tk.id = 'Identifier'
-        return tk
-    if word in RE_RESERVED_WORDS:
-        tk.id = 'reserved words'
-        return tk
-    if word == RE_rSQUARE_BRACKET:
-        tk.id = 'right square bracket'
-        return tk
-    if word == RE_lSQUARE_BRACKET:
-        tk.id = 'left square bracket'
-        return tk
-    tk.id = 'unknown'
-    return tk
-
-
-# finds all the functions
 def find_functions(text: list[str], file: str):
     text_pointer = 0
     while text_pointer < len(text):
@@ -313,7 +258,7 @@ def find_functions(text: list[str], file: str):
         if len(line) > 0:
             if line[0] == '/' and line[1] == '*':
                 text_pointer = end_comment(text, text_pointer)
-            if line[0] != '//':
+            if line[0] != '/' and line[1] != '/':
                 if isfunction(line, text, text_pointer):
                     text_pointer = extract_function(text, text_pointer, file)
         text_pointer += 1
@@ -375,15 +320,6 @@ def extract_function(function_text: list[str], text_pointer: int, file: str) -> 
         Function_Token(name, start_pointer + 1, text_pointer, return_value, function_identifiers_list, file))
     function_dict[name] = len(function_list) - 1
     return text_pointer - 1
-
-
-'''
-solution
-    if name not in function_dict:
-        function_list.append(
-            Function_Token(name, start_pointer + 1, text_pointer, return_value, function_identifiers_list, file))
-        function_dict[name] = len(function_list) - 1
-'''
 
 
 # gets the return value of function

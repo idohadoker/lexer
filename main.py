@@ -9,7 +9,9 @@ def main():
     header_list = convert_to_include(header_list)
     tokens_tuple = lex(header_list)
     for tk in tokens_tuple:
-        print(tk)
+        if isinstance(tk, Token) and tk.id == 'reserve_word':
+            print(tk)
+    print(len(function_list))
 
 
 if __name__ == '__main__':

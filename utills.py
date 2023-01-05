@@ -16,7 +16,7 @@ RE_RESERVED_WORDS = [r'while',
                      r'#ifndef',
                      r'#endif',
                      r'struct',
-                     r'typedef struct',
+                     r'typedef',
                      r'enum',
                      r'sizeof',
                      r'#include',
@@ -26,30 +26,33 @@ RE_RESERVED_WORDS = [r'while',
                      r'goto,'
                      r'#elif',
                      r'#else',
-                     r'return']  # done
+                     r'return']
 RE_COMMENT = r'//'  # done
 RE_COMMENT_END = [r'*', r'/']  # done
 RE_COMMENT_START = [r'/', r'*']  # done
-RE_VARIABLES_TYPE = [r'int', r'long', r'short', r'double', r'char', r'float', r'auto', r'void', r'FILE']  # done
-RE_MODIFIER = [r'const', r'signed', r'unsigned', r'static', r'volatile', r'register', r'extern']  # done
-RE_ARITHMETIC_OPERATOR = [r'-', r'+', r'*', r'/', r'%']  # done
-RE_ASSIGNMENTS_OPERATOR = [r'=', r'+=', r'-=', r'*=', r'/=', r'%=']  # done
-RE_BITWISE_ASSIGNMENT_OPERATOR = [r'<<=', r'>>=', r'&=', r'|=', r'^=']  # done
-RE_UNARY_OPERATOR = [r'++', r'--']  # done
-RE_RELATIONAL_OPERATOR = [r'<=', r'<', r'>=', r'>', r'==', r'!=']  # done
-RE_LOGICAL_OPERATOR = [r'&&', r'||']  # done
-RE_BITWISE_OPERATOR = [r'&', r',', r',', r'^', r'<<', r'>>', r'~']  # done
-RE_Special_Characters = [r'[', r']', r'.', r'\"', '&']  # done
-RE_lPAREN = r'('  # done
-RE_rPAREN = r')'  # done
-RE_lBRACKET = r'{'  # done
-RE_rBRACKETS = r'}'  # done
-RE_number = r'\d+'  # done
+RE_VARIABLES_TYPE = [r'int', r'long', r'short', r'double', r'char', r'float', r'auto', r'void', r'FILE']
+RE_MODIFIER = [r'const', r'signed', r'unsigned', r'static', r'volatile', r'register', r'extern']
+RE_ARITHMETIC_OPERATOR = [r'-', r'+', r'/', r'%']
+RE_UNARY_OPERATOR = [r'++', r'--']  #
+RE_RELATIONAL_OPERATOR = [r'<=', r'<', r'>=', r'>', r'==', r'!=']
+RE_LOGICAL_OPERATOR = [r'&&', r'||']
+RE_BITWISE_OPERATOR = [r'&', r'^', r'|', r'<<', r'>>', r'~']
+RE_Special_Characters = [r'[', r']', ',', r'.', r'"', '\'', '?', ':', '\'']
+RE_lPAREN = r'('
+RE_rPAREN = r')'
+RE_lBRACKET = r'{'
+RE_rBRACKETS = r'}'
+RE_number = r'-?\d+(\.\d+)?'
 RE_lSQUARE_BRACKET = r']'
 RE_rSQUARE_BRACKET = r'['
 RE_Headers = r'#include *"([^"]+[a-zA-Z]+\.[h])"'
-RE_Identifiers = r'^[a-zA-Z_]+[a-zA-Z0-9_]*'  # done
+RE_Identifiers = r'[a-zA-Z_.][a-zA-Z0-9_.]*'
 RE_Function = r'[a-zA-Z_][a-zA-Z0-9_]*\('
+RE_Semicolon = r';'
+RE_Arrow = r'->'
+RE_Ampersand = r'&[a-zA-Z]'
+RE_Asterisk = r'*[a-zA-Z]'
+RE_NOT = r'!'
 
 
 # -----------------------------------------------------------------------------------------------------------------
